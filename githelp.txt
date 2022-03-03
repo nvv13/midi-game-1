@@ -1,0 +1,31 @@
+Быстрая настройка - если вы уже делали подобное раньше
+HTTPS
+https://gitflic.ru/project/nvv13/midi-game-1.git
+
+Начните с создания нового файла или загрузки существующего файла. Мы рекомендуем в каждый репозиторий добавлять файлы README, LICENSE, и .gitignore.
+Глобальные настройки Git
+git config --global user.name "nvv13"
+git config --global user.email "nvv13@mail.ru"
+
+Создание нового репозитория
+git clone https://gitflic.ru/project/nvv13/midi-game-1.git
+cd midi-game-1
+touch README.md
+git add README.md
+git commit -m "add README"
+git push -u origin master
+
+Использовать существующую директорию
+cd existing_folder
+git init
+git remote add origin https://gitflic.ru/project/nvv13/midi-game-1.git
+git add .
+git commit -m "Initial commit"
+git push -u origin master
+
+Запушить существующий репозиторий
+cd existing_folder
+git remote rename origin old-origin
+git remote add origin https://gitflic.ru/project/nvv13/midi-game-1.git
+git push -u origin --all
+git push -u origin --tags
