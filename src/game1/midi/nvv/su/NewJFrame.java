@@ -5,16 +5,12 @@
  */
 package game1.midi.nvv.su;
 
+import javax.sound.midi.*;
 import java.awt.*;
-
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
-
-import javax.sound.midi.*;
- 
-import java.net.URL;
-import java.io.File;
 
 /**
  *
@@ -56,133 +52,162 @@ import java.io.File;
 
  */
 public class NewJFrame extends javax.swing.JFrame {
-
+    
+    public static final int END_OF_TRACK = 47;
+    public static final int GAME_STAT_FIRST_NEW_NOTE = 0;
+    public static final int GAME_STAT_WAIT_RIGHT_NOTE = 1;
+    public static final int GAME_STAT_REPEAT_NOTE = 2;
+    //Choice noteChoice = new Choice();
+    static int velocity = 125; //64-volume is 50%  ,0-note off, 1-127-volume
   MidiDevice inDevice = null;
   MidiDevice outDevice = null;
-  
-  ArrayList<MidiDevice> inDevices = new ArrayList<MidiDevice>();
-  ArrayList<MidiDevice> outDevices = new ArrayList<MidiDevice>();
-
+    ArrayList<MidiDevice> inDevices = new ArrayList<>();
+    ArrayList<MidiDevice> outDevices = new ArrayList<>();
   Sequence  sequence  = null;
   Sequencer sequencer = null;
-  public static final int END_OF_TRACK = 47;
-
-  MyReceiver MyReceiver1 = null; 
-
+  MyReceiver MyReceiver1 = null;
+    //TimerTask task = new MyTask();
+    //const int STEP_;
   Date date = new Date();
   int channel=0;
   int i_SustainPedal_value=0x0, i_SustenutoPedal_value=0x0, i_SoftPedal_value=0x0;
-
-  Date date1 = new Date();
-  Timer     timer = new Timer();
-  //TimerTask task = new MyTask();
-  //const int STEP_;
-  
-  public static final int GAME_STAT_FIRST_NEW_NOTE = 0;
-  public static final int GAME_STAT_WAIT_RIGHT_NOTE = 1;
-  public static final int GAME_STAT_REPEAT_NOTE = 2;
-  
+    Timer timer = new Timer();
   int iCheckNote=-1, iStep=GAME_STAT_FIRST_NEW_NOTE;
   int iNoteCount=0, iNoteRight=0, iNoteNoRight=0;
-  //Choice noteChoice = new Choice();
-  static int velocity = 125; //64-volume is 50%  ,0-note off, 1-127-volume
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JToggleButton AllSoundOFF;
+    private java.awt.Label LabelNoteCount;
+    private java.awt.Label LabelNoteNoRight;
+    private java.awt.Label LabelNoteRight;
+    private java.awt.Label LabelSost;
+    private javax.swing.JPanel PaneItog;
+    private javax.swing.JToggleButton SoftPedal;
+    private javax.swing.JToggleButton SustainPedal;
+    private javax.swing.JToggleButton SustenutoPedal;
+    private javax.swing.JButton btnFileChoice;
+    private javax.swing.JButton btnOpenDev;
+    private javax.swing.JButton btnPlayMidi;
+    private javax.swing.JButton btnRefreshListDev;
+    private javax.swing.JButton btnStartStopGame;
+    private javax.swing.JCheckBox cbNoteA;
+    private javax.swing.JCheckBox cbNoteA_sharp;
+    private javax.swing.JCheckBox cbNoteB;
+    private javax.swing.JCheckBox cbNoteC;
+    private javax.swing.JCheckBox cbNoteC_sharp;
+    private javax.swing.JCheckBox cbNoteD;
+    private javax.swing.JCheckBox cbNoteD_sharp;
+    private javax.swing.JCheckBox cbNoteE;
+    private javax.swing.JCheckBox cbNoteF;
+    private javax.swing.JCheckBox cbNoteF_sharp;
+    private javax.swing.JCheckBox cbNoteG;
+    private javax.swing.JCheckBox cbNoteG_sharp;
+    private javax.swing.JCheckBox cbOctavaA;
+    private javax.swing.JCheckBox cbOctavaA1;
+    private javax.swing.JCheckBox cbOctavaA2;
+    private javax.swing.JCheckBox cbOctava_a;
+    private javax.swing.JCheckBox cbOctava_a1;
+    private javax.swing.JCheckBox cbOctava_a2;
+    private javax.swing.JCheckBox cbOctava_a3;
+    private javax.swing.JCheckBox cbOctava_a4;
+    private javax.swing.JCheckBox cbOctava_a5;
+    private javax.swing.JTextField fileNameBox;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel6;
+    private javax.swing.JLabel lbVelocity;
+    private javax.swing.JComboBox midiInChoice;
+    private javax.swing.JComboBox midiOutChoice;
+    private javax.swing.JComboBox noteChoice;
+    private javax.swing.JSlider slider_velocity;
+    
+    /**
+     * Creates new form NewJFrame
+     */
+    public NewJFrame() {
+        
+        initComponents();
+        
+        noteChoice.removeAllItems();
+        noteChoice.addItem("Level2(1) D# E");
+        noteChoice.addItem("Level2(2) E F");
+        noteChoice.addItem("Level3 D# E F");
+        noteChoice.addItem("Level4 D D# E F");
+        noteChoice.addItem("Level5 D D# E F F#");
+        noteChoice.addItem("Level6 C# D D# E F F#");
+        noteChoice.addItem("Level7 C C# D D# E F F#");
+        noteChoice.addItem("Level8 C C# D D# E F F# G");
+        noteChoice.addItem("Level9 C C# D D# E F F# G G#");
+        noteChoice.addItem("Level10 C C# D D# E F F# G G# A");
+        noteChoice.addItem("Level11 C C# D D# E F F# G G# A A#");
+        noteChoice.addItem("Level12 C C# D D# E F F# G G# A A# B");
+        
+        RefreshMidiDevLists();
+        
+    }
+    
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(NewJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(NewJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(NewJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(NewJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+        
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new NewJFrame().setVisible(true);
+            }
+        });
+    }
 
-  
 public void RefreshMidiDevLists()
 {
-try 
+try
  {
   midiOutChoice.removeAllItems();
-  outDevices.clear();			
-  midiInChoice.removeAllItems();			
-  inDevices.clear();			
+  outDevices.clear();
+  midiInChoice.removeAllItems();
+  inDevices.clear();
   MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
-  for (int i = 0; i < infos.length; i++)
-   {
-   MidiDevice device = MidiSystem.getMidiDevice(infos[i]);
-   //System.out.print("\r\n");
-   if (device.getMaxReceivers() > 0 || device.getMaxReceivers()==-1)
-	        {
-      midiOutChoice.addItem(infos[i].getName());// getDescription());
-      outDevices.add(device);
-    }
-   if (device.getMaxTransmitters() > 0 || device.getMaxTransmitters()==-1)
-	        {
-      midiInChoice.addItem(infos[i].getName());//.getDescription());
-      inDevices.add(device);
+     for (MidiDevice.Info info : infos) {
+         MidiDevice device = MidiSystem.getMidiDevice(info);
+         //System.out.print("\r\n");
+         if (device.getMaxReceivers() > 0 || device.getMaxReceivers() == -1) {
+             midiOutChoice.addItem(info.getName());// getDescription());
+             outDevices.add(device);
+         }
+         if (device.getMaxTransmitters() > 0 || device.getMaxTransmitters() == -1) {
+             midiInChoice.addItem(info.getName());//.getDescription());
+             inDevices.add(device);
+         }
      }
-    }
  } catch (MidiUnavailableException e) {System.out.print(e);}
-}  
-  
-  public class MyReceiver implements Receiver {
-	  
-	  private Receiver reciv1;
-	  
-	  public MyReceiver(Receiver receiver){
-	    this.reciv1 = receiver;
-	  }
-	  
-	  // Method descriptor #8 (Ljavax/sound/midi/MidiMessage;J)V
-	  public void send(javax.sound.midi.MidiMessage arg0, long arg1) // void send(MidiMessage message,  long timeStamp);
-	   {
-	   byte[] m1 = arg0.getMessage();
-	   
-	   for(int iM=0;iM<arg0.getLength();iM++)
-	    {
-	       if(iM==0)
-	    	System.out.printf("0x%x",m1[iM]);
-	        else
-	        System.out.print(m1[iM]);
-	       System.out.print("\t");
-	    }
-       System.out.println(arg1);
-
-       
-
-       if(iCheckNote!=-1 && arg0.getLength()==3 && m1[0]==(byte)ShortMessage.NOTE_ON)
-        {
-        System.out.print(arg0.getLength());
-        System.out.print("\t");
-        System.out.println(iStep);
-        if(iStep==GAME_STAT_WAIT_RIGHT_NOTE)
-         {
-    	 if(m1[1]==iCheckNote)
-    	  {
-    	   PaneItog.setBackground(Color.GREEN);
-    	   LabelSost.setText("ОК, правильно!");
-    	   iNoteRight++;
-    	   iStep=GAME_STAT_FIRST_NEW_NOTE;
-           // Ждать 1 секунд, прежде чем выполнить task()...
-    	   //System.out.println(task);
-    	   timer.purge();
-           timer.schedule( new MyTask(), 1000 );
-    	  }else{
-     	   PaneItog.setBackground(Color.RED);
-     	   LabelSost.setText("Не, правильно!, Попробуй ещё!");
-     	  iNoteNoRight++;
-    	   iStep=GAME_STAT_REPEAT_NOTE;
-    	   timer.purge();
-           timer.schedule( new MyTask(), 1000 );
-    		
-       	  }
-    	 RefreshItog();
-    	 }
-        else
-        { 	 
-        iStep=GAME_STAT_WAIT_RIGHT_NOTE;
-        //reciv1.send(arg0, arg1);
-        }
-    	   
-        }
-       //else
-       reciv1.send(arg0, arg1);
-       
-	   };
-	  
-	  // Method descriptor #1 ()V
-	  public void close(){reciv1.close();};
-	}
+}
 
    public void RefreshItog(){
 	  LabelNoteCount.setText(String.format("Загадано нот=%d", iNoteCount));
@@ -192,24 +217,24 @@ try
 
   public int GetRandomNote() //
   {
-	  /*private Checkbox cbNoteC , cbNoteC_sharp, 
+	  /*private Checkbox cbNoteC , cbNoteC_sharp,
       cbNoteD , cbNoteD_sharp,
       cbNoteE ,
       cbNoteF , cbNoteF_sharp,
       cbNoteG , cbNoteG_sharp,
       cbNoteA , cbNoteA_sharp,
-      cbNoteB ;*/ 
-	  ArrayList<Integer> NoteList = new ArrayList<Integer>(); 
+      cbNoteB ;*/
+      ArrayList<Integer> NoteList = new ArrayList<>();
 	  if(cbNoteC. isSelected())NoteList.add(0);
-	  if(cbNoteC_sharp.isSelected())NoteList.add(1); 
-	  if(cbNoteD.isSelected())NoteList.add(2); 
+	  if(cbNoteC_sharp.isSelected())NoteList.add(1);
+	  if(cbNoteD.isSelected())NoteList.add(2);
 	  if(cbNoteD_sharp.isSelected())NoteList.add(3);
-	  if(cbNoteE.isSelected())NoteList.add(4); 
-	  if(cbNoteF.isSelected())NoteList.add(5); 
+	  if(cbNoteE.isSelected())NoteList.add(4);
+	  if(cbNoteF.isSelected())NoteList.add(5);
 	  if(cbNoteF_sharp.isSelected())NoteList.add(6);
-	  if(cbNoteG.isSelected())NoteList.add(7); 
+	  if(cbNoteG.isSelected())NoteList.add(7);
 	  if(cbNoteG_sharp.isSelected())NoteList.add(8);
-	  if(cbNoteA.isSelected())NoteList.add(9); 
+	  if(cbNoteA.isSelected())NoteList.add(9);
 	  if(cbNoteA_sharp.isSelected())NoteList.add(10);
 	  if(cbNoteB.isSelected())NoteList.add(11);
 	  //
@@ -224,7 +249,7 @@ try
       cbOctava_a4,// а4
       cbOctava_a5;// а5
 	   */
-	  ArrayList<Integer> OctavaList = new ArrayList<Integer>(); 
+      ArrayList<Integer> OctavaList = new ArrayList<>();
 	  if(cbOctavaA2.isSelected())OctavaList.add(0);
 	  if(cbOctavaA1.isSelected())OctavaList.add(1);
 	  if(cbOctavaA.isSelected())OctavaList.add(2);
@@ -235,7 +260,7 @@ try
 	  if(cbOctava_a4.isSelected())OctavaList.add(7);
 	  if(cbOctava_a5.isSelected())OctavaList.add(8);
 	  //
-	  if(NoteList.size()==0 || OctavaList.size()==0)
+      if (NoteList.isEmpty() || OctavaList.isEmpty())
 	   return -1;
 	  //
 	  Random random_note   = new Random();
@@ -246,69 +271,7 @@ try
 	  //
 	  System.out.printf("Nota=%d, Octava=%d \r\n",iNote,iOctava);
 	  return (12 * iOctava) +  iNote;
-  };
-  
-
-  public class MyTask extends TimerTask {
-	    public void run() {
-	     System.out.println( "Запуск задачи" );
-		 try {
-	        if (outDevice!=null && outDevice.isOpen())
-	          {
-                  if(iStep!=GAME_STAT_FIRST_NEW_NOTE)    
-	           LabelSost.setText("Жду правильное нажатие ноты");
-                   else
-                   {
-	           iCheckNote=GetRandomNote();
-	           iNoteCount++;
-	           LabelSost.setText("Жду нажатие ноты");
-                   }
-	          PaneItog.setBackground(Color.YELLOW);
-	          if(iCheckNote!=-1)
-	        	{
-			    ShortMessage on = new ShortMessage();
-			    on.setMessage(ShortMessage.NOTE_ON, channel, iCheckNote, velocity);
-			    MyReceiver1.send(on, new Date().getTime());
-				
-				Thread.sleep(1000);
-				
-				ShortMessage off = new ShortMessage();
-			    off.setMessage(ShortMessage.NOTE_OFF, channel, iCheckNote, velocity);
-			    MyReceiver1.send(off, new Date().getTime());
-	        	}
-	          }
-		    } catch (InvalidMidiDataException e) {System.out.print(e);
-		    } catch (InterruptedException e) {System.out.print(e);
-		    }
-	    }
-	}
-
-  
-  
-  /**
-     * Creates new form NewJFrame
-     */
-    public NewJFrame() {
-
-        initComponents();
-        
-    noteChoice.removeAllItems();
-    noteChoice.addItem("Level2(1) D# E");
-    noteChoice.addItem("Level2(2) E F");
-    noteChoice.addItem("Level3 D# E F");
-    noteChoice.addItem("Level4 D D# E F");
-    noteChoice.addItem("Level5 D D# E F F#");
-    noteChoice.addItem("Level6 C# D D# E F F#");
-    noteChoice.addItem("Level7 C C# D D# E F F#");
-    noteChoice.addItem("Level8 C C# D D# E F F# G");
-    noteChoice.addItem("Level9 C C# D D# E F F# G G#");
-    noteChoice.addItem("Level10 C C# D D# E F F# G G# A");
-    noteChoice.addItem("Level11 C C# D D# E F F# G G# A A#");
-    noteChoice.addItem("Level12 C C# D D# E F F# G G# A A# B");
-
-    RefreshMidiDevLists();
-    
-    }
+  }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -321,9 +284,9 @@ try
 
         jPanel1 = new javax.swing.JPanel();
         btnRefreshListDev = new javax.swing.JButton();
-        jLabel1 = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel1 = new javax.swing.JLabel();
         midiInChoice = new javax.swing.JComboBox();
-        jLabel2 = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel2 = new javax.swing.JLabel();
         midiOutChoice = new javax.swing.JComboBox();
         btnOpenDev = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
@@ -338,7 +301,7 @@ try
         slider_velocity = new javax.swing.JSlider();
         jLabel3 = new javax.swing.JLabel();
         lbVelocity = new javax.swing.JLabel();
-        panel_note = new javax.swing.JPanel();
+        javax.swing.JPanel panel_note = new javax.swing.JPanel();
         btnStartStopGame = new javax.swing.JButton();
         noteChoice = new javax.swing.JComboBox();
         cbNoteC = new javax.swing.JCheckBox();
@@ -353,7 +316,7 @@ try
         cbNoteA = new javax.swing.JCheckBox();
         cbNoteA_sharp = new javax.swing.JCheckBox();
         cbNoteB = new javax.swing.JCheckBox();
-        jTextField1 = new javax.swing.JTextField();
+        javax.swing.JTextField jTextField1 = new javax.swing.JTextField();
         PaneItog = new javax.swing.JPanel();
         LabelSost = new java.awt.Label();
         LabelNoteCount = new java.awt.Label();
@@ -377,11 +340,7 @@ try
         setTitle("MIDI Game demo");
 
         btnRefreshListDev.setText("refresh Dev");
-        btnRefreshListDev.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnRefreshListDevActionPerformed(evt);
-            }
-        });
+        btnRefreshListDev.addActionListener(this::btnRefreshListDevActionPerformed);
 
         jLabel1.setText("MIDI IN");
 
@@ -392,11 +351,7 @@ try
         midiOutChoice.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         btnOpenDev.setText("OpenDev");
-        btnOpenDev.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnOpenDevActionPerformed(evt);
-            }
-        });
+        btnOpenDev.addActionListener(this::btnOpenDevActionPerformed);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -417,10 +372,10 @@ try
                 .addComponent(btnOpenDev)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {midiInChoice, midiOutChoice});
-
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnOpenDev, btnRefreshListDev});
+        
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, midiInChoice, midiOutChoice);
+        
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, btnOpenDev, btnRefreshListDev);
 
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -856,8 +811,8 @@ try
           outDevice.close();
           outDevice = null;
           }
-         inDevice =  (MidiDevice)inDevices.get(midiInChoice.getSelectedIndex());
-         outDevice = (MidiDevice)outDevices.get(midiOutChoice.getSelectedIndex());
+         inDevice = inDevices.get(midiInChoice.getSelectedIndex());
+         outDevice = outDevices.get(midiOutChoice.getSelectedIndex());
     	 if (! inDevice.isOpen())inDevice.open();
          if (! outDevice.isOpen())outDevice.open();
         
@@ -866,19 +821,19 @@ try
         Receiver r = outDevice.getReceiver();
         if (r == null)System.err.println (outDevice + ".getReceiver() == null");
   		if (t != null && r != null)
-  		 { 
+  		 {
   		 MyReceiver1 = new MyReceiver(r);
          t.setReceiver (MyReceiver1);
          btnStartStopGame.enable();
-     	 LabelSost.setText("Жду запуска игры");  		
+     	 LabelSost.setText("Жду запуска игры");
   		 }
   		
         btnRefreshListDev.disable();
   		}
   		else
   		{
- 	  	btnOpenDev.setLabel("OpenDev"); 
-  		if(MyReceiver1!=null)
+ 	  	btnOpenDev.setLabel("OpenDev");
+            if (MyReceiver1 != null)
  		 {
  		 MyReceiver1.close();
  		 MyReceiver1=null;
@@ -894,7 +849,7 @@ try
            outDevice = null;
          }
         btnRefreshListDev.enable();
- 	    }	
+ 	    }
           		}
   	    catch (Exception ex)
   		        {
@@ -936,7 +891,8 @@ try
 	  		    {
 	  		    	btnPlayMidi.setLabel("stop Play");
 	            //Sequence sequence = MidiSystem.getSequence(new URL("http://www.polymusic.ru/basemf/djc0.mid"));
-  	        if( fn.toLowerCase().startsWith("http:"))
+                    assert fn != null;
+                    if (fn.toLowerCase().startsWith("http:"))
   	 		   sequence = MidiSystem.getSequence(new URL(fn));
   	        else
   	           sequence = MidiSystem.getSequence(new File(fn));
@@ -976,7 +932,7 @@ try
                 sequencer.close();
                 sequencer=null;
                 sequence=null;
-                btnPlayMidi.setLabel("Play Midi");	  		    
+                btnPlayMidi.setLabel("Play Midi");
                 }
 	 		} catch (IOException  e) {System.out.print(e);
 	  	      } catch (InvalidMidiDataException e) {System.out.print(e);
@@ -1001,30 +957,30 @@ try
     		cbNoteG_sharp.setSelected(false);
     		cbNoteA.setSelected(false);
     		cbNoteA_sharp.setSelected(false);
-    		cbNoteB.setSelected(false);    
+    		cbNoteB.setSelected(false);
         	String[] a_note=s_note.split(" ");
-        	for(int iInd=0;iInd<a_note.length;iInd++){
-        		//System.out.println("["+a_note[iInd]+"]");
-        		if(a_note[iInd].equalsIgnoreCase("C"))cbNoteC.setSelected(true);
-        		if(a_note[iInd].equalsIgnoreCase("C#"))cbNoteC_sharp.setSelected(true);
-        		if(a_note[iInd].equalsIgnoreCase("D"))cbNoteD.setSelected(true);
-        		if(a_note[iInd].equalsIgnoreCase("D#"))cbNoteD_sharp.setSelected(true);
-        		if(a_note[iInd].equalsIgnoreCase("E"))cbNoteE.setSelected(true);
-        		if(a_note[iInd].equalsIgnoreCase("F"))cbNoteF.setSelected(true);
-        		if(a_note[iInd].equalsIgnoreCase("F#"))cbNoteF_sharp.setSelected(true);
-        		if(a_note[iInd].equalsIgnoreCase("G"))cbNoteG.setSelected(true);
-        		if(a_note[iInd].equalsIgnoreCase("G#"))cbNoteG_sharp.setSelected(true);
-        		if(a_note[iInd].equalsIgnoreCase("A"))cbNoteA.setSelected(true);
-        		if(a_note[iInd].equalsIgnoreCase("A#"))cbNoteA_sharp.setSelected(true);
-        		if(a_note[iInd].equalsIgnoreCase("B"))cbNoteB.setSelected(true);
-        	}
-        		
+        for (String s : a_note) {
+            //System.out.println("["+a_note[iInd]+"]");
+            if (s.equalsIgnoreCase("C")) cbNoteC.setSelected(true);
+            if (s.equalsIgnoreCase("C#")) cbNoteC_sharp.setSelected(true);
+            if (s.equalsIgnoreCase("D")) cbNoteD.setSelected(true);
+            if (s.equalsIgnoreCase("D#")) cbNoteD_sharp.setSelected(true);
+            if (s.equalsIgnoreCase("E")) cbNoteE.setSelected(true);
+            if (s.equalsIgnoreCase("F")) cbNoteF.setSelected(true);
+            if (s.equalsIgnoreCase("F#")) cbNoteF_sharp.setSelected(true);
+            if (s.equalsIgnoreCase("G")) cbNoteG.setSelected(true);
+            if (s.equalsIgnoreCase("G#")) cbNoteG_sharp.setSelected(true);
+            if (s.equalsIgnoreCase("A")) cbNoteA.setSelected(true);
+            if (s.equalsIgnoreCase("A#")) cbNoteA_sharp.setSelected(true);
+            if (s.equalsIgnoreCase("B")) cbNoteB.setSelected(true);
+        }
+        	
     }//GEN-LAST:event_noteChoiceActionPerformed
 
     private void SustainPedalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SustainPedalActionPerformed
 	 		try {
 	 		ShortMessage on_Sustain = new ShortMessage();
-	 		if(i_SustainPedal_value==0) 
+	 		if(i_SustainPedal_value==0)
 	 		    {
 	 			i_SustainPedal_value=0x7F;
 	 		    SustainPedal.setBackground(Color.green);
@@ -1086,7 +1042,7 @@ try
     private void btnStartStopGameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartStopGameActionPerformed
   	   if(btnStartStopGame.getLabel()=="Start")
   		{
-  		btnStartStopGame.setLabel("Stop"); 
+  		btnStartStopGame.setLabel("Stop");
   		iNoteCount=0; iNoteRight=0;	iNoteNoRight=0;
   		RefreshItog();
   		// Ждать 1 секунд, прежде чем выполнить task()...
@@ -1095,106 +1051,111 @@ try
   		else
   		{
  	  	timer.purge();
-  	  	btnStartStopGame.setLabel("Start"); 
+  	  	btnStartStopGame.setLabel("Start");
                 iCheckNote=-1; iStep=GAME_STAT_FIRST_NEW_NOTE;
                 PaneItog.setBackground(Color.WHITE);
-                LabelSost.setText("Жду запуска игры");  		
-                }	
+                LabelSost.setText("Жду запуска игры");
+                }
     }//GEN-LAST:event_btnStartStopGameActionPerformed
 
     private void slider_velocityStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_slider_velocityStateChanged
         velocity=slider_velocity.getValue();
-        lbVelocity.setText( "velocity : "+Integer.toString(velocity)+" " );       
+        lbVelocity.setText("velocity : " + velocity + " ");
     }//GEN-LAST:event_slider_velocityStateChanged
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(NewJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(NewJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(NewJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(NewJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+    
+    public class MyReceiver implements Receiver {
+        
+        private final Receiver reciv1;
+        
+        public MyReceiver(Receiver receiver) {
+            this.reciv1 = receiver;
         }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new NewJFrame().setVisible(true);
+        
+        // Method descriptor #8 (Ljavax/sound/midi/MidiMessage;J)V
+        public void send(javax.sound.midi.MidiMessage arg0, long arg1) // void send(MidiMessage message,  long timeStamp);
+        {
+            byte[] m1 = arg0.getMessage();
+            
+            for (int iM = 0; iM < arg0.getLength(); iM++) {
+                if (iM == 0)
+                    System.out.printf("0x%x", m1[iM]);
+                else
+                    System.out.print(m1[iM]);
+                System.out.print("\t");
             }
-        });
+            System.out.println(arg1);
+            
+            
+            if (iCheckNote != -1 && arg0.getLength() == 3 && m1[0] == (byte) ShortMessage.NOTE_ON) {
+                System.out.print(arg0.getLength());
+                System.out.print("\t");
+                System.out.println(iStep);
+                if (iStep == GAME_STAT_WAIT_RIGHT_NOTE) {
+                    if (m1[1] == iCheckNote) {
+                        PaneItog.setBackground(Color.GREEN);
+                        LabelSost.setText("ОК, правильно!");
+                        iNoteRight++;
+                        iStep = GAME_STAT_FIRST_NEW_NOTE;
+                        // Ждать 1 секунд, прежде чем выполнить task()...
+                        //System.out.println(task);
+                        timer.purge();
+                        timer.schedule(new MyTask(), 1000);
+                    } else {
+                        PaneItog.setBackground(Color.RED);
+                        LabelSost.setText("Не, правильно!, Попробуй ещё!");
+                        iNoteNoRight++;
+                        iStep = GAME_STAT_REPEAT_NOTE;
+                        timer.purge();
+                        timer.schedule(new MyTask(), 1000);
+                        
+                    }
+                    RefreshItog();
+                } else {
+                    iStep = GAME_STAT_WAIT_RIGHT_NOTE;
+                    //reciv1.send(arg0, arg1);
+                }
+                
+            }
+            //else
+            reciv1.send(arg0, arg1);
+            
+        }
+        
+        // Method descriptor #1 ()V
+        public void close() {
+            reciv1.close();
+        }
     }
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JToggleButton AllSoundOFF;
-    private java.awt.Label LabelNoteCount;
-    private java.awt.Label LabelNoteNoRight;
-    private java.awt.Label LabelNoteRight;
-    private java.awt.Label LabelSost;
-    private javax.swing.JPanel PaneItog;
-    private javax.swing.JToggleButton SoftPedal;
-    private javax.swing.JToggleButton SustainPedal;
-    private javax.swing.JToggleButton SustenutoPedal;
-    private javax.swing.JButton btnFileChoice;
-    private javax.swing.JButton btnOpenDev;
-    private javax.swing.JButton btnPlayMidi;
-    private javax.swing.JButton btnRefreshListDev;
-    private javax.swing.JButton btnStartStopGame;
-    private javax.swing.JCheckBox cbNoteA;
-    private javax.swing.JCheckBox cbNoteA_sharp;
-    private javax.swing.JCheckBox cbNoteB;
-    private javax.swing.JCheckBox cbNoteC;
-    private javax.swing.JCheckBox cbNoteC_sharp;
-    private javax.swing.JCheckBox cbNoteD;
-    private javax.swing.JCheckBox cbNoteD_sharp;
-    private javax.swing.JCheckBox cbNoteE;
-    private javax.swing.JCheckBox cbNoteF;
-    private javax.swing.JCheckBox cbNoteF_sharp;
-    private javax.swing.JCheckBox cbNoteG;
-    private javax.swing.JCheckBox cbNoteG_sharp;
-    private javax.swing.JCheckBox cbOctavaA;
-    private javax.swing.JCheckBox cbOctavaA1;
-    private javax.swing.JCheckBox cbOctavaA2;
-    private javax.swing.JCheckBox cbOctava_a;
-    private javax.swing.JCheckBox cbOctava_a1;
-    private javax.swing.JCheckBox cbOctava_a2;
-    private javax.swing.JCheckBox cbOctava_a3;
-    private javax.swing.JCheckBox cbOctava_a4;
-    private javax.swing.JCheckBox cbOctava_a5;
-    private javax.swing.JTextField fileNameBox;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JMenuItem jMenuItem1;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel6;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JLabel lbVelocity;
-    private javax.swing.JComboBox midiInChoice;
-    private javax.swing.JComboBox midiOutChoice;
-    private javax.swing.JComboBox noteChoice;
-    private javax.swing.JPanel panel_note;
-    private javax.swing.JSlider slider_velocity;
+    
+    public class MyTask extends TimerTask {
+        public void run() {
+            System.out.println("Запуск задачи");
+            try {
+                if (outDevice != null && outDevice.isOpen()) {
+                    if (iStep != GAME_STAT_FIRST_NEW_NOTE)
+                        LabelSost.setText("Жду правильное нажатие ноты");
+                    else {
+                        iCheckNote = GetRandomNote();
+                        iNoteCount++;
+                        LabelSost.setText("Жду нажатие ноты");
+                    }
+                    PaneItog.setBackground(Color.YELLOW);
+                    if (iCheckNote != -1) {
+                        ShortMessage on = new ShortMessage();
+                        on.setMessage(ShortMessage.NOTE_ON, channel, iCheckNote, velocity);
+                        MyReceiver1.send(on, new Date().getTime());
+                        
+                        Thread.sleep(1000);
+                        
+                        ShortMessage off = new ShortMessage();
+                        off.setMessage(ShortMessage.NOTE_OFF, channel, iCheckNote, velocity);
+                        MyReceiver1.send(off, new Date().getTime());
+                    }
+                }
+            } catch (InvalidMidiDataException | InterruptedException e) {
+                System.out.print(e);
+            }
+        }
+    }
     // End of variables declaration//GEN-END:variables
 }
